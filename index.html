@@ -466,4 +466,88 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 
 <!-- ═══ SCRIPTS ═══ -->
 <script src="project-data.js"></script>
-<scrip
+<script>
+// Render dynamic content from project-data.js
+function initDashboard() {
+  // Update sync time
+  document.getElementById('sync-time').textContent = window.PB.updated;
+  document.getElementById('footer-sync').textContent = 'Data last synced: ' + window.PB.updated;
+
+  // Render milestones
+  const milestonesContainer = document.getElementById('milestones-container');
+  window.PB.milestones.forEach(m => {
+    const statusClass = m.status === 'complete' ? 'status-complete' : m.status === 'in-progress' ? 'status-progress' : 'status-planned';
+    const barClass = m.status === 'complete' ? 'bar-complete' : m.status === 'in-progress' ? 'bar-progress' : 'bar-planned';
+    const row = document.createElement('div');
+    row.className = 'milestone-row';
+    row.innerHTML = `
+      <div class="phase">${m.phase}</div>
+      <div class="label">${m.label}</div>
+      <div class="progress-bar"><div class="progress-fill ${barClass}" style="width:${m.pct}%"></div></div>
+      <div class="pct">${m.pct}%</div>
+      <div class="status-badge ${statusClass}">${m.status.toUpperCase()}</div>
+    `;
+    milestonesContainer.appendChild(row);
+  });
+
+  // Render moats
+  const moatsContainer = document.getElementById('moats-container');
+  window.PB.moats.forEach(moat => {
+    const card = document.createElement('div');
+    card.className = 'moat-card';
+    card.innerHTML = `
+      <div class="icon">${moat.icon}</div>
+      <div class="title">${moat.title}</div>
+      <div class="desc">${moat.desc}</div>
+    `;
+    moatsContainer.appendChild(card);
+  });
+}
+
+// Tab switching
+function switchTab(e, tabId) {
+  const group = e.target.parentElement;
+  const allContent = group.parentElement.querySelectorAll('.tab-content');
+  allContent.forEach(c => c.classList.remove('on'));
+  group.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('on'));
+  e.target.classList.add('on');
+  document.getElementById(tabId).classList.add('on');
+}
+
+// Side nav scroll
+function scrollToSection(sectionId) {
+  const el = document.getElementById(sectionId);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('on'));
+    event.target.classList.add('on');
+  }
+}
+
+// Initialize on load
+window.addEventListener('load', initDashboard);
+</script>
+
+</div><!-- /main-app-content -->
+
+<script>
+// SHA-256 Password Gate
+async function verifyPw(){
+  var pw=document.getElementById('pwInput').value;
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));
+  var hash=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+  // Tsui1977=/
+  if(hash==='a2e7fc3df012bc227ff036774ed2d0e8aba1fe333629c632b777c831eeb7a43e'){
+    document.getElementById('pwGate').classList.add('hidden');
+    document.getElementById('mainContent').classList.add('unlocked');
+  } else {
+    document.getElementById('pwErr').textContent='Invalid password / 密码错误';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
+}
+document.getElementById('pwInput').addEventListener('keydown',function(e){if(e.key==='Enter')verifyPw()});
+</script>
+
+</body>
+</html>
