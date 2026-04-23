@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Blitzkrieg — Investor Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#FAFAFE;--bg2:#F0F0F8;--card:#ffffff;--border:#E0E0EA;--gold:#FF6B00;--gold2:#E85D00;--blue:#0071e3;--cyan:#0ea5e9;--green:#00D984;--red:#ff3b30;--purple:#af52de;--pink:#ff2d55;--orange:#ff9500;--text:#1d1d1f;--dim:#6e6e73;--bright:#1d1d1f;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");}
+
+/* ═══ HEADER ═══ */
+.hdr{background:linear-gradient(135deg,#1B1B2F,#2D2D4A 50%,#1B1B2F);border-bottom:3px solid #FF6B00;padding:20px 32px;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(20,20,50,.25);}
+.hdr-in{max-width:1700px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.hdr h1{font-size:24px;font-weight:900;background:linear-gradient(90deg,#FFA833,#FFD699);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.3px;}
+.hdr .sub{font-size:12px;color:#8888A0;margin-top:2px;}
+.sync-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,107,0,.3);padding:6px 12px;border-radius:20px;font-size:10px;color:#E0E0EA;}
+.sync-badge .dot{width:6px;height:6px;border-radius:50%;background:#34E88A;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ═══ SIDE NAV ═══ */
+.side-nav{position:fixed;left:0;top:0;width:220px;height:100vh;background:var(--card);border-right:1px solid var(--border);overflow-y:auto;padding:20px 0;z-index:50;display:flex;flex-direction:column;}
+.nav-logo{padding:0 16px;margin-bottom:24px;text-align:center;font-size:12px;font-weight:600;color:var(--dim);}
+.nav-items{flex:1;}
+.nav-item{padding:12px 16px;font-size:13px;cursor:pointer;transition:.2s;border-left:3px solid transparent;color:var(--dim);}
+.nav-item:hover{background:var(--bg2);color:var(--text);}
+.nav-item.on{border-left-color:var(--gold);background:var(--bg2);color:var(--text);font-weight:600;}
+.nav-footer{padding:16px;border-top:1px solid var(--border);font-size:10px;color:var(--dim);}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:220px;padding:28px 32px;}
+.sec-wrap{margin-bottom:32px;}
+.sec{font-size:20px;font-weight:800;margin-bottom:6px;color:var(--bright);letter-spacing:-.3px;}
+.sec-d{font-size:12px;color:var(--dim);margin-bottom:18px;}
+
+/* ═══ HERO ═══ */
+.hero{background:linear-gradient(135deg,#1B1B2F,#2D2D4A 50%,#1B1B2F);border:2px solid var(--gold);border-radius:18px;padding:40px;margin-bottom:32px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(255,179,71,.12),transparent 50%),radial-gradient(circle at 70% 60%,rgba(255,107,0,.1),transparent 50%);animation:heroPulse 8s ease-in-out infinite;}
+@keyframes heroPulse{0%,100%{opacity:.5}50%{opacity:1}}
+.hero-content{position:relative;z-index:2;text-align:center;}
+.hero h2{font-size:48px;font-weight:900;background:linear-gradient(135deg,#FFB347,#FFE4B5,#FFB347);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.hero-sub{font-size:18px;color:#E0E0EA;margin-bottom:20px;}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:24px;}
+.hero-stat{text-align:center;}
+.hero-stat .val{font-size:32px;font-weight:900;color:#fff;}
+.hero-stat .lbl{font-size:11px;color:#E0E0EA;margin-top:4px;text-transform:uppercase;letter-spacing:.8px;}
+
+/* ═══ CARDS GRID ═══ */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:.2s;}
+.card:hover{border-color:#FF6B00;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.08);}
+.card .bar{position:absolute;top:0;left:0;right:0;height:3px;}
+.card h3{font-size:16px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.card h3 .icon{font-size:24px;}
+.card p{font-size:12px;color:var(--dim);line-height:1.6;margin-bottom:6px;}
+.card strong{color:var(--text);}
+.card ul{list-style:none;font-size:12px;color:var(--dim);}
+.card li{padding:4px 0;line-height:1.6;}
+.card li:before{content:'▸';color:var(--gold);margin-right:8px;}
+
+/* ═══ MOAT CARDS ═══ */
+.moat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:20px 0;}
+@media(max-width:1200px){.moat-grid{grid-template-columns:repeat(2,1fr);}}
+.moat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center;transition:.2s;}
+.moat-card:hover{transform:translateY(-3px);border-color:#FF6B00;}
+.moat-card .icon{font-size:32px;margin-bottom:10px;}
+.moat-card .title{font-size:13px;font-weight:700;margin-bottom:6px;}
+.moat-card .desc{font-size:11px;color:var(--dim);line-height:1.5;}
+
+/* ═══ MILESTONE TRACKER ═══ */
+.milestone-row{display:flex;align-items:center;gap:14px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;transition:.2s;}
+.milestone-row:hover{border-color:#FF6B00;background:#FAFAFE;}
+.milestone-row .phase{font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--bg2);min-width:60px;text-align:center;}
+.milestone-row .label{flex:1;font-size:12px;font-weight:600;color:var(--text);}
+.milestone-row .progress-bar{width:120px;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;}
+.milestone-row .progress-fill{height:100%;border-radius:3px;transition:width .5s;}
+.milestone-row .pct{font-size:11px;font-weight:700;min-width:35px;text-align:right;}
+.milestone-row .status-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;}
+
+/* ═══ FINANCIAL TABLE ═══ */
+.fin-table{width:100%;border-collapse:collapse;margin:16px 0;}
+.fin-table th{background:#1B1B2F;padding:12px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;text-align:left;color:#FFB347;}
+.fin-table td{padding:12px 14px;font-size:12px;border-top:1px solid var(--border);background:var(--card);color:var(--text);}
+.fin-table td.dim{color:var(--dim);}
+.fin-table tr:hover td{background:#f5ede0;}
+
+/* ═══ COMPARISON CARDS ═══ */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0;}
+.comp-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.comp-card .comp-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.comp-card .comp-val{font-size:28px;font-weight:900;color:var(--text);margin-bottom:2px;}
+.comp-card .comp-sub{font-size:11px;color:var(--dim);}
+
+/* ═══ TABS ═══ */
+.tabs-wrapper{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.tab-btn{padding:12px 20px;border:none;background:none;color:var(--dim);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;border-bottom:3px solid transparent;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.on{border-bottom-color:var(--gold);color:var(--text);}
+.tab-content{display:none;}
+.tab-content.on{display:block;}
+
+/* ═══ FOOTER ═══ */
+.footer{background:var(--card);border-top:1px solid var(--border);padding:20px 32px;margin-top:40px;margin-left:-32px;margin-right:-32px;margin-bottom:-28px;}
+.footer-in{max-width:1700px;margin:0 auto;}
+.footer-notice{font-size:11px;color:var(--dim);margin-bottom:16px;padding:12px 14px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--gold);}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap;font-size:12px;}
+.footer-link{color:var(--dim);}
+.footer-link:hover{color:var(--text);}
+.footer-sync{font-size:10px;color:var(--dim);margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+
+/* ═══ COLORS ═══ */
+.status-complete{background:#ccfbea;color:#10392E;border:1px solid #86efbf;}
+.status-progress{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
+.status-planned{background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;}
+
+.bar-complete{background:#00D984;}
+.bar-progress{background:#f59e0b;}
+.bar-planned{background:#3b82f6;}
+
+@media(max-width:1024px){
+  .side-nav{width:0;padding:0;}
+  .main{margin-left:0;}
+  .moat-grid{grid-template-columns:repeat(2,1fr);}
+  .hero-stats{grid-template-columns:1fr;}
+  .comp-grid{grid-template-columns:1fr;}
+}
+
+@media(max-width:768px){
+  .hdr-in{flex-direction:column;align-items:flex-start;}
+  .main{padding:16px;}
+  .hero{padding:20px;}
+  .hero h2{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDE NAV ═══ -->
+<div class="side-nav">
+  <div class="nav-logo">Navigation</div>
+  <div class="nav-items">
+    <div class="nav-item on" onclick="scrollToSection('hero')">Hero Vision</div>
+    <div class="nav-item" onclick="scrollToSection('market')">Market Opportunity</div>
+    <div class="nav-item" onclick="scrollToSection('tech')">Technology</div>
+    <div class="nav-item" onclick="scrollToSection('financial')">Financial Highlights</div>
+    <div class="nav-item" onclick="scrollToSection('roadmap')">Growth Roadmap</div>
+    <div class="nav-item" onclick="scrollToSection('moats')">Competitive Moats</div>
+  </div>
+  <div class="nav-footer">Data-driven investor portal<br>Synced from operations</div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<div class="hdr"><div class="hdr-in">
+  <div><h1>Project Blitzkrieg</h1><div class="sub">AI Energy Infrastructure — Investor Dashboard</div></div>
+  <div class="sync-badge"><div class="dot"></div>Last synced: <span id="sync-time"></span></div>
+</div></div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main">
+
+<!-- HERO SECTION -->
+<div id="hero" class="sec-wrap">
+  <div class="hero">
+    <div class="hero-content">
+      <h2>AI Energy Infrastructure Platform</h2>
+      <div class="hero-sub">Solving the $1.8T global AI power shortage with 111-day deployment cycles</div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="val" id="hero-tam">$1.8T</div>
+          <div class="lbl">Market TAM (2024-2030)</div>
+        </div>
+        <div class="hero-stat">
+          <div class="val" id="hero-speed">111 Days</div>
+          <div class="lbl">Deployment Speed vs 18-24 mo Industry</div>
+        </div>
+        <div class="hero-stat">
+          <div class="val" id="hero-margin">34.4%</div>
+          <div class="lbl">Net Margin at Scale</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MARKET OPPORTUNITY -->
+<div id="market" class="sec-wrap">
+  <h2 class="sec">Market Opportunity</h2>
+  <p class="sec-d">The AI energy infrastructure market is experiencing unprecedented demand with a critical supply gap</p>
+
+  <div class="mgrid">
+    <div class="card">
+      <div class="bar" style="background:#00D984;"></div>
+      <h3><span class="icon">📊</span>Demand Surge</h3>
+      <p>Global AI compute demand: <strong id="market-demand">15 GW</strong> required by 2026</p>
+      <p>Grid queue backlog: <strong id="market-queue">4+ years</strong> for traditional infrastructure</p>
+    </div>
+    <div class="card">
+      <div class="bar" style="background:#f59e0b;"></div>
+      <h3><span class="icon">⚡</span>The Supply Gap</h3>
+      <p>Industry deployment: <span id="market-industry-speed">18-24 months</span> per facility</p>
+      <p>Our solution: <span id="market-our-speed">111 days</span> per facility (20x faster than waiting in grid queue)</p>
+    </div>
+    <div class="card">
+      <div class="bar" style="background:#3b82f6;"></div>
+      <h3><span class="icon">🎯</span>Total Addressable Market</h3>
+      <ul>
+        <li>600+ ideal deployment locations nationwide</li>
+        <li>Top 4 hyperscalers demand ~300MW each</li>
+        <li>Pricing power: $0.15-0.18/kWh (premium to regional averages)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- TECHNOLOGY OVERVIEW -->
+<div id="tech" class="sec-wrap">
+  <h2 class="sec">Technology Advantage</h2>
+  <p class="sec-d">Proprietary systems enable unprecedented speed, reliability, and scale at edge locations</p>
+
+  <div class="tabs-wrapper">
+    <button class="tab-btn on" onclick="switchTab(event, 'tech-overview')">Overview</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tech-specs')">Technical Specs</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tech-moats')">Innovation Moats</button>
+  </div>
+
+  <div id="tech-overview" class="tab-content on">
+    <div class="mgrid">
+      <div class="card">
+        <div class="bar" style="background:#FF6B00;"></div>
+        <h3><span class="icon">⚙️</span>Deployment System</h3>
+        <p><strong>Proprietary rapid-deploy architecture:</strong> Patented robotic choreography and logistics orchestration</p>
+        <p>111-day turnkey deployment from site acquisition to commercial operation</p>
+        <p>Eliminates grid queue bottleneck entirely</p>
+      </div>
+      <div class="card">
+        <div class="bar" style="background:#00D984;"></div>
+        <h3><span class="icon">🛡️</span>Reliability</h3>
+        <p><strong id="tech-uptime">99.999% uptime</strong> (five nines) guaranteed</p>
+        <p><strong id="tech-redundancy">N+3 redundancy</strong> across solar, BESS, controls</p>
+        <p>Multi-layer fault tolerance designed for hyperscaler SLAs</p>
+      </div>
+      <div class="card">
+        <div class="bar" style="background:#0ea5e9;"></div>
+        <h3><span class="icon">🔬</span>Intellectual Property</h3>
+        <p><strong id="tech-patents">5 patents</strong> covering deployment methodology and system architecture</p>
+        <p>Trade-secret manufacturing processes impossible to replicate</p>
+        <p>Hard moat: $1B+ capex required to copy</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tech-specs" class="tab-content">
+    <div class="card">
+      <h3>System Specifications</h3>
+      <table class="fin-table">
+        <tr>
+          <th>Component</th>
+          <th>Per Site</th>
+        </tr>
+        <tr>
+          <td>Solar Capacity</td>
+          <td><strong id="tech-solar">770 MW</strong> (1M+ panels)</td>
+        </tr>
+        <tr>
+          <td>BESS Capacity</td>
+          <td><strong id="tech-bess">2,100 MWh</strong> (2-4 hour duration)</td>
+        </tr>
+        <tr>
+          <td>Deployment Timeline</td>
+          <td><strong id="tech-deploy">111 days</strong> end-to-end</td>
+        </tr>
+        <tr>
+          <td>Uptime Guarantee</td>
+          <td><strong id="tech-uptime-table">99.999%</strong> (five nines)</td>
+        </tr>
+        <tr>
+          <td>Strike Team Size</td>
+          <td><strong id="tech-team">50 robots</strong> + 25 personnel</td>
+        </tr>
+        <tr>
+          <td>Manufacturing Footprint</td>
+          <td>Vertically integrated — <strong>in-house production</strong></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="tech-specs" class="tab-content">
+    <div class="mgrid">
+      <div class="card">
+        <h3><span class="icon">🔐</span>Speed Moat</h3>
+        <p>Competitors require 18-24 months to commission. We deploy in 111 days using proprietary robotic systems.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon">🏭</span>Manufacturing Moat</h3>
+        <p>Vertically integrated production from panel assembly to BESS integration. Competitors source from fragmented vendors.</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon">📡</span>Control Systems Moat</h3>
+        <p>Proprietary AI-driven dispatch algorithms optimize for customer requirements and maximize revenue capture.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FINANCIAL HIGHLIGHTS -->
+<div id="financial" class="sec-wrap">
+  <h2 class="sec">Financial Highlights</h2>
+  <p class="sec-d">Investor-safe financial projections based on unit economics and operational ramp</p>
+
+  <div class="tabs-wrapper">
+    <button class="tab-btn on" onclick="switchTab(event, 'fin-unit')">Unit Economics</button>
+    <button class="tab-btn" onclick="switchTab(event, 'fin-scale')">Growth Projection</button>
+    <button class="tab-btn" onclick="switchTab(event, 'fin-market')">Market Comparison</button>
+  </div>
+
+  <div id="fin-unit" class="tab-content on">
+    <div class="mgrid">
+      <div class="card">
+        <div class="bar" style="background:#00D984;"></div>
+        <h3><span class="icon">💰</span>Per-Site Revenue</h3>
+        <p><strong id="fin-per-site">$2.9B-3.3B</strong> over 25-year operating life</p>
+        <p>Based on 100MW capacity × multi-hyperscaler offtake agreements</p>
+      </div>
+      <div class="card">
+        <div class="bar" style="background:#f59e0b;"></div>
+        <h3><span class="icon">📈</span>Net Margin</h3>
+        <p><strong id="fin-margin">34.4%</strong> at scale (3+ year horizon)</p>
+        <p>Drives $1.2B+ annual profit at 10-site scale</p>
+      </div>
+      <div class="card">
+        <div class="bar" style="background:#0ea5e9;"></div>
+        <h3><span class="icon">🎯</span>Capex per Site</h3>
+        <p><strong>$1.2-1.4B</strong> per 100MW unit (turnkey)</p>
+        <p>Includes land, solar, BESS, controls, deployment, network infrastructure</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="fin-scale" class="tab-content">
+    <div class="card">
+      <h3>3-Year Growth Projection</h3>
+      <table class="fin-table">
+        <tr>
+          <th>Year</th>
+          <th>Teams</th>
+          <th>Sites</th>
+          <th>Capacity (MW)</th>
+          <th>Revenue</th>
+          <th>Profit (Net)</th>
+        </tr>
+        <tr>
+          <td class="dim">Year 1</td>
+          <td class="dim">2</td>
+          <td class="dim">12</td>
+          <td class="dim">1,200</td>
+          <td><strong>~$3.6B</strong></td>
+          <td><strong>~$1.2B</strong></td>
+        </tr>
+        <tr>
+          <td class="dim">Year 2</td>
+          <td class="dim">5</td>
+          <td class="dim">30</td>
+          <td class="dim">3,000</td>
+          <td><strong>~$9B</strong></td>
+          <td><strong>~$3.1B</strong></td>
+        </tr>
+        <tr>
+          <td class="dim">Year 3</td>
+          <td class="dim">10</td>
+          <td class="dim">60</td>
+          <td class="dim">6,000</td>
+          <td><strong>~$18B</strong></td>
+          <td><strong>~$6.2B</strong></td>
+        </tr>
+      </table>
+      <p style="margin-top:16px;font-size:11px;color:var(--dim);">Note: Ranges reflect conservative capex assumptions and standard hyperscaler contract terms. Year 3+ scales toward $1T+ market valuation.</p>
+    </div>
+  </div>
+
+  <div id="fin-market" class="tab-content">
+    <div class="comp-grid">
+      <div class="comp-card">
+        <div class="comp-label">Project Blitzkrieg</div>
+        <div class="comp-val">$300B</div>
+        <div class="comp-sub">Nasdaq Target (Year 3)</div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-label">Traditional Power Operators</div>
+        <div class="comp-val">$50-100B</div>
+        <div class="comp-sub">Typical market cap (10-15% margins)</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <h3>Why 3x Higher Valuation Multiple?</h3>
+      <ul>
+        <li><strong>111-day deployment</strong> (vs 18-24 months): Unprecedented speed to revenue</li>
+        <li><strong>$300B+ addressable market</strong> with first-mover advantage</li>
+        <li><strong>Hyperscaler lock-in</strong> via long-term contracts (20+ year NPVs)</li>
+        <li><strong>34.4% net margins</strong> at scale (2-3x traditional utility margins)</li>
+        <li><strong>Network effects</strong> as strike teams achieve deployment velocity</li>
+        <li><strong>IP moat</strong> (5 patents + manufacturing exclusivity)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- GROWTH ROADMAP -->
+<div id="roadmap" class="sec-wrap">
+  <h2 class="sec">Growth Roadmap</h2>
+  <p class="sec-d">7-phase execution plan from entity setup through global scale</p>
+
+  <div id="milestones-container"></div>
+</div>
+
+<!-- COMPETITIVE MOATS -->
+<div id="moats" class="sec-wrap">
+  <h2 class="sec">Competitive Moats</h2>
+  <p class="sec-d">Five interconnected advantages that create a 10+ year competitive moat</p>
+
+  <div id="moats-container" class="moat-grid"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-in">
+    <div class="footer-notice">⚠️ Confidential — For Qualified Investors Only. This dashboard contains forward-looking projections and non-public operational data. Unauthorized distribution prohibited.</div>
+    <div class="footer-links">
+      <span class="footer-link"><a href="Project-Blitzkrieg-Strategic-Mindmap.html" style="color:inherit;text-decoration:none;">Internal Operations Dashboard (EN)</a> — Restricted Access</span>
+    </div>
+    <div class="footer-sync" id="footer-sync"></div>
+  </div>
+</div>
+
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="project-data.js"></script>
+<script>
+// Render dynamic content from project-data.js
+function initDashboard() {
+  // Update sync time
+  document.getElementById('sync-time').textContent = window.PB.updated;
+  document.getElementById('footer-sync').textContent = 'Data last synced: ' + window.PB.updated;
+
+  // Render milestones
+  const milestonesContainer = document.getElementById('milestones-container');
+  window.PB.milestones.forEach(m => {
+    const statusClass = m.status === 'complete' ? 'status-complete' : m.status === 'in-progress' ? 'status-progress' : 'status-planned';
+    const barClass = m.status === 'complete' ? 'bar-complete' : m.status === 'in-progress' ? 'bar-progress' : 'bar-planned';
+    const row = document.createElement('div');
+    row.className = 'milestone-row';
+    row.innerHTML = `
+      <div class="phase">${m.phase}</div>
+      <div class="label">${m.label}</div>
+      <div class="progress-bar"><div class="progress-fill ${barClass}" style="width:${m.pct}%"></div></div>
+      <div class="pct">${m.pct}%</div>
+      <div class="status-badge ${statusClass}">${m.status.toUpperCase()}</div>
+    `;
+    milestonesContainer.appendChild(row);
+  });
+
+  // Render moats
+  const moatsContainer = document.getElementById('moats-container');
+  window.PB.moats.forEach(moat => {
+    const card = document.createElement('div');
+    card.className = 'moat-card';
+    card.innerHTML = `
+      <div class="icon">${moat.icon}</div>
+      <div class="title">${moat.title}</div>
+      <div class="desc">${moat.desc}</div>
+    `;
+    moatsContainer.appendChild(card);
+  });
+}
+
+// Tab switching
+function switchTab(e, tabId) {
+  // Hide all tab contents in same group
+  const group = e.target.parentElement;
+  const allContent = group.parentElement.querySelectorAll('.tab-content');
+  allContent.forEach(c => c.classList.remove('on'));
+
+  // Deactivate all buttons in same group
+  group.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('on'));
+
+  // Activate clicked button and show content
+  e.target.classList.add('on');
+  document.getElementById(tabId).classList.add('on');
+}
+
+// Side nav scroll
+function scrollToSection(sectionId) {
+  const el = document.getElementById(sectionId);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+    // Update active nav item
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('on'));
+    event.target.classList.add('on');
+  }
+}
+
+// Initialize on load
+window.addEventListener('load', initDashboard);
+</script>
+
+</body>
+</html>
